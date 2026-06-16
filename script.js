@@ -20,6 +20,8 @@ function goHome(){
   $("practicePicker").classList.add("hidden");
   $("learnPicker").classList.add("hidden");
   updateScore();
+  if (typeof updateExamModeUI === "function") updateExamModeUI();
+  updateHistoryBtn();
 }
 function updateScore(){
   $("modeLabel").textContent = state.mode || "Alege modul";
@@ -34,11 +36,27 @@ function updateScore(){
 }
 
 function startExam(){
+  const usedIds = isUniqueMode ? getUsedQuestions() : [];
   const selected = [];
+  
   for(const [cat, count] of Object.entries(EXAM_CONFIG)){
-    selected.push(...shuffle(byCat(cat)).slice(0, count));
+    const availableInCat = byCat(cat).filter(q => !usedIds.includes(q.id));
+    selected.push(...shuffle(availableInCat).slice(0, count));
   }
+  
+  const totalRequired = Object.values(EXAM_CONFIG).reduce((a,b)=>a+b, 0);
+  if (isUniqueMode && selected.length < totalRequired) {
+    if (selected.length === 0) {
+      alert("Ai epuizat toate întrebările! Resetează istoricul pentru a o lua de la capăt.");
+      return;
+    }
+    alert(`Atenție! Nu mai sunt suficiente întrebări noi pentru un test complet. Am generat testul cu cele ${selected.length} întrebări rămase.`);
+  }
+
   state = { mode: "Simulare examen", questions: shuffle(selected), index: 0, answers: [], locked: false };
+  if(isUniqueMode) {
+    saveUsedQuestions(selected);
+  }
   showQuestion();
 }
 
@@ -164,5 +182,48 @@ function nextLearnQuestion(){
 
 function escapeHtml(str){ return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 function escapeForJs(str){ return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'"); }
+
+function getUsedQuestions() {
+  return JSON.parse(localStorage.getItem('usedQuestions') || '[]');
+}
+
+function saveUsedQuestions(questionsArray) {
+  const used = getUsedQuestions();
+  const newUsed = [...new Set([...used, ...questionsArray.map(q => q.id)])];
+  localStorage.setItem('usedQuestions', JSON.stringify(newUsed));
+  updateHistoryBtn();
+}
+
+function resetExamHistory() {
+  localStorage.removeItem('usedQuestions');
+  updateHistoryBtn();
+  alert("Istoricul examenelor a fost resetat! Toate întrebările sunt din nou disponibile pentru simulare.");
+}
+
+function updateHistoryBtn() {
+  const btn = $("resetHistoryBtn");
+  if(btn) {
+    const usedCount = getUsedQuestions().length;
+    btn.textContent = `🔄 Resetează istoricul (${usedCount} întrebări folosite)`;
+    btn.style.opacity = isUniqueMode ? "1" : "0.5";
+  }
+}
+
+let isUniqueMode = true;
+
+function updateExamModeUI() {
+   const savedMode = localStorage.getItem('examMode') || 'unique';
+   isUniqueMode = savedMode === 'unique';
+   if($("examModeUnique")) $("examModeUnique").checked = isUniqueMode;
+   if($("examModeRandom")) $("examModeRandom").checked = !isUniqueMode;
+}
+
+function updateExamMode() {
+  if($("examModeRandom")) {
+    isUniqueMode = !$("examModeRandom").checked;
+    localStorage.setItem('examMode', isUniqueMode ? 'unique' : 'random');
+    updateHistoryBtn();
+  }
+}
 
 goHome();

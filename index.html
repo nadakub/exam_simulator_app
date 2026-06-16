@@ -36,6 +36,19 @@
           <span>Navighezi prin categorii și vezi răspunsurile corecte</span>
         </button>
       </div>
+      <div style="margin-top: 1.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.8rem;">
+        <div style="display: flex; gap: 1.5rem; align-items: center; justify-content: center; flex-wrap: wrap;">
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 0.4rem; font-size: 0.95rem;">
+            <input type="radio" name="examMode" id="examModeUnique" value="unique" checked onchange="updateExamMode()">
+            <span>Reține întrebările (fără dubluri)</span>
+          </label>
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 0.4rem; font-size: 0.95rem;">
+            <input type="radio" name="examMode" id="examModeRandom" value="random" onchange="updateExamMode()">
+            <span>Întrebări random (stilul vechi)</span>
+          </label>
+        </div>
+        <button class="ghost" onclick="resetExamHistory()" id="resetHistoryBtn" style="font-size: 0.9rem;">🔄 Resetează istoricul (0 întrebări folosite)</button>
+      </div>
       <div id="practicePicker" class="hidden picker">
         <h3>Alege categoria pentru practică</h3>
         <div id="categoryButtons" class="cat-grid"></div>
