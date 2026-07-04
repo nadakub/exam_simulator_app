@@ -4232,14 +4232,6 @@ window.QUESTIONS = [
       {
         "key": "E",
         "text": "(a, b, c, e)"
-      },
-      {
-        "key": "F",
-        "text": "generarea autocontrolului"
-      },
-      {
-        "key": "G",
-        "text": "verificarea procesului de producție continuu și permanent Care dintre combinațiile de mai jos reprezintă trăsături specifice controlului:"
       }
     ],
     "correct": "B",
